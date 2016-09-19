@@ -145,11 +145,16 @@ def threaded_get_data(ticker_list, start_date, end_date):
 
 @timer
 def vanilla_get_data(ticker_list, start_date, end_date):
+    """
+
+    See documentation for `threaded_get_data`
+
+    """
     data_dict = {}
     for ticker in ticker_list:
         ticker = ticker.strip().split()[0]
         try:
-            data_dict[ticker] = get_data(ticker, start_date, end_date)
+            data_dict[ticker] = {'data': get_data(ticker, start_date, end_date)}
         except KeyError:
             pass
     return data_dict
