@@ -9,6 +9,8 @@ import threading
 import time
 from functools import wraps
 
+#pd.np.seterr(invalid='raise')
+
 def parse_path(ticker_path):
     """
     Returns a pathlib.Path object if the path
@@ -40,7 +42,7 @@ def read_tickers(ticker_file):
     """
     try:
         with ticker_file.open() as f:
-            lines = f.readlines()
+            lines = f.read().split('\n')
     except IOError:
         raise IOError("Could not open file {}. Check if file exists or try again".format(ticker_file))
 
@@ -59,11 +61,17 @@ def get_data(ticker, start, end):
     Returns:
         pd.DataFrame: DataFrame with Adj_Close values from start to end dates
 
-    Note: Will raise KeyError if there is no data for the ticker
+    Note: Will raise ValueError if there is no data for the ticker
 
     """
+    if not ticker:
+        raise ValueError("Empty string")
+    ticker = ticker.strip()
     share = Share(ticker)
     data = share.get_historical(start, end)
+
+    if not data:
+        raise ValueError("No data found")
 
     data = pd.DataFrame(data)
     data = data.loc[:, ["Date", "Adj_Close"]]
@@ -89,11 +97,17 @@ def thread_get_data(ticker, start, end, data_dict, Lock):
         Lock (threading.Lock): threading.Lock() object for printing
 
     """
+
     try:
-        data_dict[ticker] = {'data': get_data(ticker, start, end)}
-    except KeyError:
+        data = get_data(ticker, start, end)
+    except ValueError as e:
         with Lock:
-            print(ticker, end=',\t')
+            print(ticker, type(e).__name__, e)
+    except Exception as e:
+        with Lock:
+            print(ticker, type(e).__name__, e)
+    else:
+        data_dict[ticker] = {'data': data}
 
 def timer(f):
     """
@@ -131,9 +145,7 @@ def threaded_get_data(ticker_list, start_date, end_date):
     data_dict = {}
     threads = []
     Lock = threading.Lock()
-
     for ticker in ticker_list:
-        ticker = ticker.strip().split()[0]
         _thread = threading.Thread(target=thread_get_data, args=(ticker, start_date, end_date, data_dict, Lock))
         threads.append(_thread)
         _thread.start()
@@ -155,30 +167,37 @@ def vanilla_get_data(ticker_list, start_date, end_date):
         ticker = ticker.strip().split()[0]
         try:
             data_dict[ticker] = {'data': get_data(ticker, start_date, end_date)}
-        except KeyError:
-            pass
+        except ValueError as e:
+            print(ticker, type(e).__name__, e)
+        except Exception as e:
+            print(ticker, type(e).__name__, e)
     return data_dict
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("ticker_path", help="Enter file name or path to file with list of tickers")
-    parser.add_argument('start_date', help="Enter start date in format yyyy-mm-dd")
-    parser.add_argument('end_date', help="Enter end date in format yyyy-mm-dd")
-    parser.add_argument('output_file', help="Enter output file name")
-
+    parser.add_argument("ticker_path", help="File name or path to file with list of tickers")
+    parser.add_argument('start_date', help="Start date in format yyyy-mm-dd")
+    parser.add_argument('end_date', help="End date in format yyyy-mm-dd")
+    parser.add_argument('output_file', help="Output file name defaults to 'output.txt'",
+                        nargs='?', default='output.txt')
+    parser.add_argument('method', nargs='?', default='threaded',
+                        help='Method to extract data "vanilla" or "threaded"')
     args = parser.parse_args()
 
     ticker_list = read_tickers(parse_path(args.ticker_path))
     start_date = dateutil.parser.parse(args.start_date).strftime("%Y-%m-%d")
     end_date = dateutil.parser.parse(args.end_date).strftime("%Y-%m-%d")
 
-    data_dict = threaded_get_data(ticker_list, start_date, end_date)
+    if args.method == 'threaded':
+        data_dict = threaded_get_data(ticker_list, start_date, end_date)
+    else:
+        data_dict = vanilla_get_data(ticker_list, start_date, end_date)
 
     with open(args.output_file, "w") as outfile:
 
-        for stock, stock_dict in data_dict.items():
+        for stock, stock_dict in sorted(data_dict.items()):
 
             returns = stock_dict['data'].Returns
 
