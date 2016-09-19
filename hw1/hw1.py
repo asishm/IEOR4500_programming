@@ -180,9 +180,9 @@ if __name__ == "__main__":
     parser.add_argument("ticker_path", help="File name or path to file with list of tickers")
     parser.add_argument('start_date', help="Start date in format yyyy-mm-dd")
     parser.add_argument('end_date', help="End date in format yyyy-mm-dd")
-    parser.add_argument('output_file', help="Output file name defaults to 'output.txt'",
+    parser.add_argument('-o', '--output_file', help="Output file name defaults to 'output.txt'",
                         nargs='?', default='output.txt')
-    parser.add_argument('method', nargs='?', default='threaded',
+    parser.add_argument('-m', '--method', nargs='?', default='threaded',
                         help='Method to extract data "vanilla" or "threaded"')
     args = parser.parse_args()
 
@@ -196,7 +196,7 @@ if __name__ == "__main__":
         data_dict = vanilla_get_data(ticker_list, start_date, end_date)
 
     with open(args.output_file, "w") as outfile:
-
+        outfile.write('Start Date: {} \t End Date: {}\n'.format(start_date, end_date))
         for stock, stock_dict in sorted(data_dict.items()):
 
             returns = stock_dict['data'].Returns
