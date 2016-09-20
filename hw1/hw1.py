@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import sys
 from yahoo_finance import Share
 import argparse
@@ -78,7 +79,7 @@ def get_data(ticker, start, end):
     data.Date = pd.to_datetime(data.Date)
     data.Adj_Close = pd.to_numeric(data.Adj_Close)
 
-    data['Returns'] = data.Adj_Close/data.Adj_Close.shift() - 1
+    data['Returns'] = data.Adj_Close/data.Adj_Close.shift(-1) - 1
 
     return data
 
@@ -138,6 +139,8 @@ def threaded_get_data(ticker_list, start_date, end_date):
         {
             'AAPL': {
                         'data': pd.DataFrame
+                        'mean': mean
+                        'variance':
                     }
         }
 
