@@ -69,19 +69,24 @@ def get_data(ticker, start, end):
         raise ValueError("Empty string")
     ticker = ticker.strip()
     share = Share(ticker)
-    data = share.get_historical(start, end)
+    sdata = share.get_historical(start, end)
 
-    if not data:
+    if not sdata:
         raise ValueError("No data found")
 
-    data = pd.DataFrame(data)
-    data = data.loc[:, ["Date", "Adj_Close"]]
-    data.Date = pd.to_datetime(data.Date)
-    data.Adj_Close = pd.to_numeric(data.Adj_Close)
+    data = pd.DataFrame(sdata)
+    try:
+        data = data.loc[:, ["Date", "Adj_Close"]]
+    except KeyError as e:
+        print('\n', ticker, data, sdata, e, '\n', sep='\n')
+        return get_data(ticker, start, end)
+    else:
+        data.Date = pd.to_datetime(data.Date)
+        data.Adj_Close = pd.to_numeric(data.Adj_Close)
 
-    data['Returns'] = data.Adj_Close/data.Adj_Close.shift(-1) - 1
+        data['Returns'] = data.Adj_Close/data.Adj_Close.shift(-1) - 1
 
-    return data
+        return data.iloc[::-1]
 
 def thread_get_data(ticker, start, end, data_dict, Lock):
     """
@@ -206,9 +211,9 @@ if __name__ == "__main__":
 
             stock_dict["mean"] = returns.mean()
             stock_dict["variance"] = returns.var()
-            stock_dict["autocor_1"] = returns.autocorr(1)
-            stock_dict["autocor_5"] = returns.autocorr(5)
-            stock_dict["autocor_10"] = returns.autocorr(10)
+            stock_dict["autocor_1"] = returns.autocorr(-1)
+            stock_dict["autocor_5"] = returns.autocorr(-5)
+            stock_dict["autocor_10"] = returns.autocorr(-10)
 
             outfile.write("-------\n{}\nmean: {}\nvariance: {}\nautocorrelation (1-day): {}\n"
                   "autocorrelation (5-day): {}\nautocorrelation (10-day): {}\n".format(
