@@ -21,16 +21,31 @@
 
 ### Usage
 
-        python3 myprices.py russell_1000_ticker.txt
+    python3 myprices.py russell_1000_ticker.txt
 - Assumes the file with list of ticker labels exists in the same directory
 - Modify the date ranges inside the program
 
-        89 for line in lines:
-        90     ticker = line.strip()
-        91     print(ticker,)
-        92     if ticker:
-        93         prices[ticker] = get_stats(ticker, '2010-01-01', '2010-07-01')
-        94     count += 1
+    ```py
+    89 for line in lines:
+    90     ticker = line.strip()
+    91     print(ticker,)
+    92     if ticker:
+    93         prices[ticker] = get_stats(ticker, '2010-01-01', '2010-07-01')
+    94     count += 1
+    ```
 
 - Outputs `daily_returns.csv` which has the ticker labels as columns and dates as rows and contains the daily returns of the tickers.
+
+    | Date  | A  | AA  | AAL  | ... |
+    |-------|----------|----------|----------|-----|
+    | 2010-06-30 | -0.00528 | -0.00099 | 0.00465 | ... |
+    | 2010-06-29 | -0.02670 | -0.02708 | 0.00820 | ... |
+    | ...   | ...      | ...      | ...      | ... |
+
 - Outputs `ticker_statistics.csv` which has ticker labels as rows and statistics (mean, variance, 1-day/5-day/10-day autocorrelation as columns)
+
+    | Ticker | Mean     | Variance | Autocorrelation_1 | Autocorrelation_5 | Autocorrelation_10 |
+    |--------|----------|----------|-------------------|-------------------|--------------------|
+    | A      | -0.00063 | 0.00038  | -0.06364          | -0.00812          | 0.06184            |
+    | AA     | -0.00367 | 0.00072  | -0.12330          | -0.05315          | 0.05581            |
+    | ...    | ...      | ...      | ...               | ...               | ...                |
