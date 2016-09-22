@@ -1,7 +1,7 @@
-## IEOR 4500: Applications Programming for FE
+# IEOR 4500: Applications Programming for FE
 
 
-#### Group Members
+## Group Members
 
 - Andrew Chen
 - Asish Mahapatra
@@ -9,9 +9,9 @@
 - Samantha Lam
 - Sebastian Ortega
 
-#### Assignment 1
+## Assignment 1
 
-##### Problem Statement
+### Problem Statement
 
 > For this assignment you need to first install the Yahoo finance package and then use the Python script I provided to download the Russell 1000 closing prices for a six-month period (any six month period).
 >
@@ -19,7 +19,7 @@
 >
 > Finally, compute the autocorrelation of returns (not prices) using a time window of 1 day, 5 days and 10 days.
 
-##### Usage
+### Usage
 
         python3 myprices.py russell_1000_ticker.txt
 - Assumes the file with list of ticker labels exists in the same directory
