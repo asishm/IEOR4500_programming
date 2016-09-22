@@ -56,8 +56,8 @@ def autocorr(alist, shift=1):
 
 def get_stats(ticker, start, end):
     data = get_data(ticker, start, end)
-    date = list(data['Date'])
-    adj_close = list(data['Adj_Close'])
+    date = data['Date']
+    adj_close = data['Adj_Close']
     returns = [a/b - 1 for a,b in zip(adj_close, adj_close[1:])]
     _mean = mean(returns)
     _var = variance(returns)
@@ -117,4 +117,4 @@ with open("ticker_statistics.csv", "w") as statfile:
         stats = prices[ticker]
         s = ','.join("{:.5f}".format(stats[stat]) if isinstance(stats[stat], float) else stats[stat]
                         for stat in ['Mean', 'Variance', 'Autocor_1', 'Autocor_5', 'Autocor_10'])
-        statfile.write("{}\n".format(s))
+        statfile.write("{},{}\n".format(ticker,s))
