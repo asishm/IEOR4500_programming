@@ -68,8 +68,13 @@ def get_data(ticker, start, end):
     if not ticker:
         raise ValueError("Empty string")
     ticker = ticker.strip()
-    share = Share(ticker)
-    sdata = share.get_historical(start, end)
+    try:
+        share = Share(ticker)
+        sdata = share.get_historical(start, end)
+    except Exception as e:
+        time.sleep(0.1)
+        print('\n', ticker, data, sdata, e, '\n', sep='\n')
+        return get_data(ticker, start, end)
 
     if not sdata:
         raise ValueError("No data found")
